@@ -312,15 +312,15 @@ BEGIN
     -- 1. Primero, asignamos la Solicitud #3 a ver que sucede
     sp_asignar_viaje(3);
     
-    -- 2. Oh no, un error del usuario. Vamos a cancelarla.
+    -- 2.un error del usuario, canclacion del viaje.
     sp_cancelar_solicitud(3);
 END;
 /
--- Verificar que ya NO existe el registro en la tabla Viaje (Borrado)
-SELECT * FROM Viaje WHERE id_solicitud = 3;
+-- Verificar que ya NO existe el registro en la tabla Viaje 
+    SELECT * FROM Viaje WHERE id_solicitud = 3;
 
 -- Verificar que el estado de la Solicitud ahora es 'Cancelado'
 SELECT estado FROM Solicitud_Viaje WHERE id_solicitud = 3;
 
--- Y LO MÁS IMPORTANTE: El conductor fue devuelto a 'Activo' en el SP y ya no quedó estancado permanentemente!
+-- El conductor fue devuelto a 'Activo' en el SP y no quedó estancado
 SELECT nombre, estado FROM Conductor;
