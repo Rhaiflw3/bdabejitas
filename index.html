@@ -1,0 +1,154 @@
+
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mowi - Optimización de Logística</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        }
+        .card-hover:hover {
+            transform: translateY(-5px);
+            transition: all 0.3s ease;
+        }
+    </style>
+</head>
+<body class="gradient-bg min-h-screen font-sans text-slate-800">
+
+    <!-- Hero Section -->
+    <header class="bg-white border-b border-slate-200 py-10 px-6">
+        <div class="max-w-6xl mx-auto text-center">
+            <h1 class="text-3xl md:text-5xl font-bold text-slate-900 mb-4">
+                Optimización de Logística con Procedimientos Almacenados: <span class="text-blue-600">El Sistema Mowi</span>
+            </h1>
+            <p class="text-lg text-slate-600 max-w-4xl mx-auto leading-relaxed">
+                El proyecto 'Mowi' utiliza <strong>Oracle SQL</strong> para integrar la lógica de negocio directamente en el motor de la base de datos. Mediante procedimientos almacenados, el sistema automatiza desde la facturación mensual hasta el cálculo de impacto ambiental, garantizando la integridad de los datos y la eficiencia operativa.
+            </p>
+        </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto py-12 px-6">
+        
+        <div class="grid md:grid-cols-2 gap-12 mb-16">
+            
+            <!-- Columna Izquierda: Automatización -->
+            <section>
+                <div class="flex items-center mb-6">
+                    <div class="p-3 bg-blue-100 rounded-lg text-blue-600 mr-4">
+                        <i class="fa-solid fa-gears text-2xl"></i>
+                    </div>
+                    <h2 class="text-2xl font-bold">Automatización de Operaciones y Facturación</h2>
+                </div>
+
+                <div class="space-y-6">
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 card-hover">
+                        <div class="flex items-start">
+                            <i class="fa-solid fa-file-invoice-dollar text-3xl text-blue-500 mr-4 mt-1"></i>
+                            <div>
+                                <h3 class="font-bold text-lg">Facturación Corporativa Consolidada</h3>
+                                <p class="text-slate-600 text-sm">El procedimiento <code class="bg-slate-100 px-1 rounded text-pink-600">sp_generar_factura_empresa</code> agrupa viajes mensuales automáticamente mediante bucles y cursores para generar cobros empresariales.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 card-hover">
+                        <div class="flex items-start">
+                            <i class="fa-solid fa-route text-3xl text-blue-500 mr-4 mt-1"></i>
+                            <div>
+                                <h3 class="font-bold text-lg">Asignación Inteligente de Viajes</h3>
+                                <p class="text-slate-600 text-sm">El sistema vincula solicitudes con conductores disponibles en tiempo real, validando estados y gestionando excepciones si no hay disponibilidad.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Columna Derecha: Integridad -->
+            <section>
+                <div class="flex items-center mb-6">
+                    <div class="p-3 bg-green-100 rounded-lg text-green-600 mr-4">
+                        <i class="fa-solid fa-shield-halved text-2xl"></i>
+                    </div>
+                    <h2 class="text-2xl font-bold">Integridad, Seguridad y Sostenibilidad</h2>
+                </div>
+
+                <div class="space-y-6">
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 card-hover text-center">
+                        <div class="flex justify-center mb-4">
+                            <div class="relative w-32 h-16 overflow-hidden">
+                                <div class="absolute inset-0 border-8 border-slate-200 border-b-0 rounded-t-full"></div>
+                                <div class="absolute inset-0 border-8 border-green-500 border-b-0 rounded-t-full" style="transform: rotate(-30deg);"></div>
+                            </div>
+                        </div>
+                        <h3 class="font-bold text-lg">Cálculo Preciso de Huella de Carbono</h3>
+                        <p class="text-slate-600 text-sm mb-2 italic">Kilogramos de CO2 generados o ahorrados</p>
+                        <p class="text-xs text-slate-500">Aplica factores matemáticos según el tipo de combustible para devolver el impacto real (Ej. Eléctrico = 0).</p>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 card-hover flex items-center">
+                        <div class="mr-6 bg-slate-50 p-4 rounded-full">
+                            <i class="fa-solid fa-lock text-3xl text-amber-500"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-lg text-slate-800">Cancelación Segura de Solicitudes</h3>
+                            <p class="text-slate-600 text-sm">Protege la integridad del servicio impidiendo la cancelación de viajes que ya están 'En curso' mediante validaciones lógicas.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- Tabla de Procedimientos -->
+        <section class="bg-white rounded-2xl shadow-md border border-slate-200 overflow-hidden">
+            <div class="bg-slate-50 px-6 py-4 border-b border-slate-200">
+                <h2 class="text-xl font-bold flex items-center">
+                    <i class="fa-solid fa-code-branch mr-3 text-blue-600"></i>
+                    Resumen de Parámetros de Mowi
+                </h2>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left">
+                    <thead>
+                        <tr class="bg-slate-100 text-slate-600 text-sm uppercase tracking-wider">
+                            <th class="px-6 py-4 font-semibold">Procedimiento</th>
+                            <th class="px-6 py-4 font-semibold">Parámetro Entrada (IN)</th>
+                            <th class="px-6 py-4 font-semibold">Acción Principal</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100">
+                        <tr class="hover:bg-slate-50 transition-colors">
+                            <td class="px-6 py-4 font-mono text-blue-600 text-sm font-bold underline">sp_asignar_viaje</td>
+                            <td class="px-6 py-4 text-slate-700">id_solicitud</td>
+                            <td class="px-6 py-4 text-slate-600">Cambia estado a 'Asignado' e inserta registro en tabla Viaje.</td>
+                        </tr>
+                        <tr class="hover:bg-slate-50 transition-colors">
+                            <td class="px-6 py-4 font-mono text-blue-600 text-sm font-bold underline">sp_calcular_emisiones</td>
+                            <td class="px-6 py-4 text-slate-700">id_viaje_real</td>
+                            <td class="px-6 py-4 text-slate-600">Multiplica distancia por factor de combustible (EJ. Eléctrico = 0).</td>
+                        </tr>
+                        <tr class="hover:bg-slate-50 transition-colors">
+                            <td class="px-6 py-4 font-mono text-blue-600 text-sm font-bold underline">sp_cancelar_solicitud</td>
+                            <td class="px-6 py-4 text-slate-700">id_solicitud</td>
+                            <td class="px-6 py-4 text-slate-600">Valida que el estado sea 'Pendiente' antes de actualizar a 'Cancelado'.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-slate-900 text-slate-400 py-10 mt-12 text-center border-t border-slate-800">
+        <p class="mb-2">© 2024 Proyecto Logístico Mowi</p>
+        <p class="text-xs">Desarrollado con Oracle SQL y Lógica de Negocio en Base de Datos</p>
+    </footer>
+
+</body>
+</html>
+
+
