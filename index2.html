@@ -1,9 +1,9 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Proyecto Mowi - Documentación Alternativa</title>
+    <title>Taller 2.1: Procedimientos Almacenados - UAC</title>
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -17,110 +17,160 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
-        .gradient-text {
-            background: linear-gradient(to right, #10b981, #3b82f6);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
+        /* Paleta de colores institucionales (UAC - Rojo y Gris) */
+        .uac-red { color: #cc0000; }
+        .bg-uac-red { background-color: #cc0000; }
+        .border-uac-red { border-color: #cc0000; }
+        
         .loader {
             border: 3px solid #f3f3f3;
-            border-top: 3px solid #10b981;
+            border-top: 3px solid #cc0000;
             border-radius: 50%;
             width: 24px;
             height: 24px;
             animation: spin 1s linear infinite;
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
+        /* Efecto sutil de sombra para los contenedores principales */
+        .panel-shadow { box-shadow: 0 10px 30px -10px rgba(0,0,0,0.1); }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800 font-sans antialiased">
+<body class="bg-gray-100 text-gray-800 font-sans antialiased flex flex-col min-h-screen">
 
-    <!-- Navegación -->
-    <nav class="bg-white shadow-sm sticky top-0 z-50 border-b border-slate-200">
-        <div class="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
-            <h1 class="text-2xl font-bold text-emerald-600"><i class="fa-solid fa-layer-group mr-2"></i> Mowi v2</h1>
-            <div class="space-x-6">
-                <a href="#infografia" class="hover:text-emerald-600 transition-colors font-medium">Vista Infografía</a>
-                <a href="#codigo" class="hover:text-emerald-600 transition-colors font-medium">Script SQL</a>
+    <!-- Cabecera Institucional (Fija arriba) -->
+    <nav class="bg-white shadow-md sticky top-0 z-50 border-b-4 border-uac-red">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex flex-col sm:flex-row justify-between items-center">
+            <!-- Izquierda: Asignatura -->
+            <div class="flex items-center mb-2 sm:mb-0">
+                <i class="fa-solid fa-database text-gray-600 text-xl mr-3"></i>
+                <div>
+                    <span class="block text-xs text-gray-500 uppercase font-bold tracking-wider">Asignatura</span>
+                    <span class="block text-sm sm:text-base font-semibold text-gray-800">Modelado de Bases de Datos</span>
+                </div>
+            </div>
+            
+            <!-- Derecha: Universidad -->
+            <div class="flex items-center text-right">
+                <div>
+                    <span class="block text-xs text-gray-500 uppercase font-bold tracking-wider">Institución</span>
+                    <span class="block text-sm sm:text-base font-bold uac-red">Universidad Andina del Cusco</span>
+                </div>
+                <i class="fa-solid fa-graduation-cap uac-red text-2xl ml-3"></i>
             </div>
         </div>
     </nav>
 
-    <!-- Cabecera -->
-    <header class="max-w-6xl mx-auto px-4 py-16 text-center">
-        <span class="px-3 py-1 bg-emerald-100 text-emerald-700 rounded-full text-sm font-bold mb-4 inline-block">ARCHIVO INDEX2.HTML</span>
-        <h2 class="text-4xl md:text-5xl font-extrabold mb-4 gradient-text">Mowi: Visualización Dinámica</h2>
-        <p class="text-lg text-slate-600 max-w-2xl mx-auto">
-            Esta es una vista alterna del proyecto que carga los recursos <code>infografia.html</code> y <code>mowi.sql</code> de forma asíncrona.
+    <!-- Título Principal del Trabajo -->
+    <header class="max-w-5xl mx-auto px-4 pt-12 pb-8 text-center">
+        <span class="inline-block py-1 px-3 rounded-full bg-red-100 text-red-800 text-sm font-semibold tracking-wide mb-4">
+            ENTREGA ACADÉMICA
+        </span>
+        <h1 class="text-4xl md:text-5xl font-extrabold text-gray-900 mb-4 tracking-tight">
+            Taller 2.1: Procedimientos Almacenados
+        </h1>
+        <p class="text-lg text-gray-600 max-w-2xl mx-auto">
+            Presentación interactiva del diseño conceptual y la implementación técnica de la base de datos para el Proyecto Mowi.
         </p>
-    </header>
-
-    <!-- SECCIÓN 1: INFOGRAFÍA -->
-    <section id="infografia" class="bg-white py-16 border-y border-slate-200">
-        <div class="max-w-7xl mx-auto px-4">
-            <div class="mb-8 flex items-center justify-between">
-                <h3 class="text-2xl font-bold">Esquema del Sistema</h3>
-                <span class="text-sm text-slate-400 font-mono">fuente: infografia.html</span>
-            </div>
-
-            <div class="w-full bg-slate-100 rounded-xl border border-slate-200 shadow-lg overflow-hidden" style="height: 75vh;">
-                <iframe src="infografia.html" class="w-full h-full border-0" title="Infografía Mowi"></iframe>
-            </div>
-        </div>
-    </section>
-
-    <!-- SECCIÓN 2: CÓDIGO SQL -->
-    <section id="codigo" class="max-w-6xl mx-auto px-4 py-16">
-        <div class="flex flex-col md:flex-row justify-between items-end mb-6">
-            <div>
-                <h3 class="text-2xl font-bold mb-1">Estructura de Datos</h3>
-                <p class="text-slate-500 text-sm italic underline decoration-emerald-300">Archivo de origen: mowi.sql</p>
-            </div>
-            <a href="mowi.sql" download class="mt-4 md:mt-0 px-5 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-lg transition-all flex items-center shadow-lg hover:scale-105">
-                <i class="fa-solid fa-file-code mr-2 text-emerald-400"></i> Bajar SQL
+        
+        <!-- Navegación interna rápida -->
+        <div class="mt-8 flex justify-center space-x-4">
+            <a href="#infografia" class="px-6 py-2 bg-white border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 hover:border-gray-400 transition-all shadow-sm font-medium">
+                <i class="fa-solid fa-sitemap mr-2 text-gray-500"></i> Ver Infografía
+            </a>
+            <a href="#codigo" class="px-6 py-2 bg-uac-red text-white rounded-md hover:bg-red-800 transition-all shadow-sm font-medium">
+                <i class="fa-solid fa-code mr-2"></i> Ver Script SQL
             </a>
         </div>
+    </header>
 
-        <div class="relative bg-[#1e1e1e] rounded-xl shadow-2xl overflow-hidden">
-            <div class="bg-[#2d2d2d] px-4 py-3 flex justify-between items-center">
-                <div class="flex space-x-2">
-                    <div class="w-3 h-3 bg-[#ff5f56] rounded-full"></div>
-                    <div class="w-3 h-3 bg-[#ffbd2e] rounded-full"></div>
-                    <div class="w-3 h-3 bg-[#27c93f] rounded-full"></div>
-                </div>
-                <button onclick="copiarCodigo()" id="btnCopiar" class="text-slate-400 hover:text-white transition-colors flex items-center text-xs uppercase tracking-widest font-bold">
-                    <i class="fa-regular fa-copy mr-1"></i> Copiar Código
-                </button>
-            </div>
-            
-            <pre class="m-0 p-0 text-sm md:text-base relative min-h-[300px]"><code class="language-sql p-8 overflow-x-auto" id="bloqueCodigo"></code>
-                <div id="loaderSQL" class="absolute inset-0 flex flex-col items-center justify-center bg-[#1e1e1e]">
-                    <div class="loader mb-4"></div>
-                    <span class="text-emerald-500 font-mono text-xs animate-pulse underline">CONECTANDO CON MOWI.SQL...</span>
-                </div>
-            </pre>
-        </div>
-    </section>
+    <!-- Contenido Principal -->
+    <main class="flex-grow">
 
-    <footer class="bg-slate-900 text-slate-500 py-12 text-center">
-        <div class="max-w-6xl mx-auto px-4">
-            <p class="text-sm">Proyecto Mowi - Visualización Técnica</p>
-            <div class="mt-4 flex justify-center space-x-4">
-                <i class="fa-brands fa-html5 text-2xl"></i>
-                <i class="fa-brands fa-css3-alt text-2xl"></i>
-                <i class="fa-brands fa-js text-2xl"></i>
+        <!-- SECCIÓN 1: INFOGRAFÍA -->
+        <section id="infografia" class="py-12">
+            <div class="max-w-7xl mx-auto px-4">
+                <div class="bg-white rounded-xl panel-shadow overflow-hidden border border-gray-200">
+                    <div class="bg-gray-50 border-b border-gray-200 px-6 py-4 flex justify-between items-center">
+                        <h2 class="text-xl font-bold text-gray-800">
+                            <i class="fa-regular fa-image mr-2 text-gray-500"></i> Arquitectura Visual
+                        </h2>
+                        <span class="text-xs font-mono bg-gray-200 text-gray-600 py-1 px-2 rounded">infografia.html</span>
+                    </div>
+                    
+                    <!-- Contenedor del Iframe -->
+                    <div class="w-full bg-gray-100 relative" style="height: 70vh; min-height: 500px;">
+                        <iframe src="infografia.html" class="w-full h-full border-0 absolute inset-0" title="Infografía del Proyecto"></iframe>
+                    </div>
+                </div>
             </div>
+        </section>
+
+        <!-- SECCIÓN 2: CÓDIGO SQL -->
+        <section id="codigo" class="py-12 bg-gray-800 text-white mt-8 border-t-4 border-uac-red">
+            <div class="max-w-6xl mx-auto px-4">
+                
+                <div class="flex flex-col md:flex-row justify-between items-end mb-8">
+                    <div>
+                        <h2 class="text-3xl font-bold mb-2">Implementación SQL</h2>
+                        <p class="text-gray-400">Script principal de creación y procedimientos almacenados.</p>
+                    </div>
+                    <a href="mowi.sql" download class="mt-4 md:mt-0 px-5 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded border border-gray-600 transition-all flex items-center">
+                        <i class="fa-solid fa-download mr-2"></i> Descargar mowi.sql
+                    </a>
+                </div>
+
+                <!-- Editor de Código -->
+                <div class="relative bg-[#1e1e1e] rounded-lg shadow-2xl border border-gray-700 overflow-hidden">
+                    <!-- Barra superior del editor -->
+                    <div class="bg-[#2d2d2d] px-4 py-3 flex justify-between items-center border-b border-gray-700">
+                        <div class="flex items-center">
+                            <i class="fa-solid fa-file-code text-gray-400 mr-2"></i>
+                            <span class="text-gray-300 text-sm font-mono font-semibold tracking-wide">mowi.sql</span>
+                        </div>
+                        <button onclick="copiarCodigo()" id="btnCopiar" class="text-gray-400 hover:text-white transition-colors flex items-center text-sm font-medium">
+                            <i class="fa-regular fa-copy mr-1"></i> Copiar
+                        </button>
+                    </div>
+                    
+                    <!-- Área de código con carga dinámica -->
+                    <pre class="m-0 p-0 text-sm md:text-base relative min-h-[400px]"><code class="language-sql p-6 overflow-x-auto" id="bloqueCodigo"></code>
+                        <!-- Loader -->
+                        <div id="loaderSQL" class="absolute inset-0 flex flex-col items-center justify-center bg-[#1e1e1e] z-10">
+                            <div class="loader mb-3"></div>
+                            <span class="text-gray-400 font-mono text-sm">Cargando script SQL...</span>
+                        </div>
+                    </pre>
+                </div>
+
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Pie de página Institucional -->
+    <footer class="bg-gray-900 text-gray-400 py-8 border-t-4 border-uac-red">
+        <div class="max-w-6xl mx-auto px-4 text-center">
+            <h3 class="text-white font-semibold text-lg mb-2">Universidad Andina del Cusco</h3>
+            <p class="text-sm mb-4">Modelado de Bases de Datos | Taller 2.1</p>
+            <div class="flex justify-center space-x-6 mt-4">
+                <a href="#" class="hover:text-white transition-colors"><i class="fa-brands fa-github text-xl"></i></a>
+                <a href="#" class="hover:text-white transition-colors"><i class="fa-solid fa-envelope text-xl"></i></a>
+            </div>
+            <p class="text-xs text-gray-600 mt-6">&copy; 2026. Documentación generada para fines académicos.</p>
         </div>
     </footer>
 
+    <!-- Lógica JavaScript -->
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const bloqueCodigo = document.getElementById('bloqueCodigo');
             const loader = document.getElementById('loaderSQL');
 
+            // Leer mowi.sql
             fetch('mowi.sql')
                 .then(response => {
-                    if (!response.ok) throw new Error('No se pudo encontrar el archivo .sql');
+                    if (!response.ok) throw new Error('No se pudo encontrar mowi.sql. Verifica que esté subido a GitHub.');
                     return response.text();
                 })
                 .then(data => {
@@ -130,11 +180,12 @@
                 })
                 .catch(error => {
                     loader.style.display = 'none';
-                    bloqueCodigo.textContent = `-- ERROR: ${error.message}\n-- Verifica que 'mowi.sql' esté en la misma carpeta que este archivo.`;
+                    bloqueCodigo.textContent = `-- [ERROR DE CARGA]\n-- ${error.message}\n-- Por favor, asegúrate de que el archivo 'mowi.sql' esté en la raíz de tu repositorio.`;
                     hljs.highlightElement(bloqueCodigo);
                 });
         });
 
+        // Función para copiar
         function copiarCodigo() {
             const codigo = document.getElementById('bloqueCodigo').innerText;
             const boton = document.getElementById('btnCopiar');
@@ -142,12 +193,16 @@
             textarea.value = codigo;
             document.body.appendChild(textarea);
             textarea.select();
+            
             try {
                 document.execCommand('copy');
                 const originalText = boton.innerHTML;
-                boton.innerHTML = '<i class="fa-solid fa-check mr-1 text-emerald-400"></i> COPIADO';
+                boton.innerHTML = '<i class="fa-solid fa-check mr-1 text-green-400"></i> <span class="text-green-400">Copiado</span>';
                 setTimeout(() => { boton.innerHTML = originalText; }, 2000);
-            } catch (err) { console.error(err); }
+            } catch (err) { 
+                console.error('Error al copiar:', err); 
+            }
+            
             document.body.removeChild(textarea);
         }
     </script>
