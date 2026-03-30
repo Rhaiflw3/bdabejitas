@@ -43,28 +43,28 @@ CREATE TABLE Conductor (
     calificacion NUMBER(3,2) -- Permite valores como 4.95
 );
 
--- 5. Tabla VEHÕCULO
+-- 5. Tabla VEHÔøΩCULO
 CREATE TABLE Vehiculo (
     id_vehiculo NUMBER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     marca VARCHAR2(50),
     modelo VARCHAR2(50),
     placa VARCHAR2(20) UNIQUE NOT NULL,
     capacidad NUMBER(2),
-    tipo VARCHAR2(50), -- Ej: ElÈctrico, HÌbrido, Gasolina
+    tipo VARCHAR2(50), -- Ej: ElÔøΩctrico, HÔøΩbrido, Gasolina
     estado VARCHAR2(20),
     id_conductor NUMBER,
     CONSTRAINT fk_vehiculo_conductor FOREIGN KEY (id_conductor) REFERENCES Conductor(id_conductor)
 );
 
--- 6. Tabla VIAJE (EjecuciÛn real)
+-- 6. Tabla VIAJE (EjecuciÔøΩn real)
 CREATE TABLE Viaje (
     id_viaje_real NUMBER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     fecha_inicio TIMESTAMP,
     fecha_fin TIMESTAMP,
-    distancia NUMBER(8,2), -- En kilÛmetros
+    distancia NUMBER(8,2), -- En kilÔøΩmetros
     costo NUMBER(10,2), -- Costo del viaje
     estado VARCHAR2(20) CHECK (estado IN ('Solicitado', 'En curso', 'Finalizado')),
-    id_solicitud NUMBER UNIQUE NOT NULL, -- RelaciÛn 1:1 con la solicitud
+    id_solicitud NUMBER UNIQUE NOT NULL, -- RelaciÔøΩn 1:1 con la solicitud
     id_conductor NUMBER NOT NULL,
     id_vehiculo NUMBER NOT NULL,
     CONSTRAINT fk_viaje_solicitud FOREIGN KEY (id_solicitud) REFERENCES Solicitud_Viaje(id_solicitud),
@@ -72,7 +72,7 @@ CREATE TABLE Viaje (
     CONSTRAINT fk_viaje_vehiculo FOREIGN KEY (id_vehiculo) REFERENCES Vehiculo(id_vehiculo)
 );
 
--- 7. Tabla FACTURACI”N
+-- 7. Tabla FACTURACIÔøΩN
 CREATE TABLE Facturacion (
     id_factura NUMBER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     fecha DATE DEFAULT SYSDATE,
@@ -81,14 +81,16 @@ CREATE TABLE Facturacion (
     id_empresa NUMBER NOT NULL,
     CONSTRAINT fk_facturacion_empresa FOREIGN KEY (id_empresa) REFERENCES Empresa(id_empresa)
 );
+
 /* =============================================================================
-   ESCENARIO 1: GeneraciÛn De FacturaciÛn Consolidada Mensual
+   SP 1 CORREGIDO: Generaci√≥n de Facturaci√≥n
 ============================================================================= */
 CREATE OR REPLACE PROCEDURE sp_generar_factura_empresa (
     p_id_empresa IN NUMBER,
-    p_mes_anio   IN VARCHAR2 -- Formato esperado: 'MM/YYYY'
+    p_mes_anio   IN VARCHAR2
 ) IS
     v_monto_total NUMBER := 0;
+    v_factura_existe NUMBER;
     
     CURSOR c_viajes IS
         SELECT v.costo
@@ -96,60 +98,75 @@ CREATE OR REPLACE PROCEDURE sp_generar_factura_empresa (
         JOIN Solicitud_Viaje s ON v.id_solicitud = s.id_solicitud
         JOIN Usuario u ON s.id_usuario = u.id_usuario
         WHERE u.id_empresa = p_id_empresa
-          AND v.estado = 'Finalizado' -- Ajustado al CHECK de tu tabla
+          AND v.estado = 'Finalizado'
           AND TO_CHAR(s.fecha_solicitud, 'MM/YYYY') = p_mes_anio;
 BEGIN
+    -- [NUEVO] Validar que no hayamos facturado este mes ya
+    SELECT COUNT(*) INTO v_factura_existe FROM Facturacion 
+    WHERE id_empresa = p_id_empresa AND TO_CHAR(fecha, 'MM/YYYY') = p_mes_anio;
+    
+    IF v_factura_existe > 0 THEN
+        RAISE_APPLICATION_ERROR(-20003, 'Ya existe una factura para este mes/a√±o y empresa.');
+    END IF;
+
     FOR r_viaje IN c_viajes LOOP
-        -- Sumamos asegurando que no haya valores nulos
         v_monto_total := v_monto_total + NVL(r_viaje.costo, 0); 
     END LOOP;
 
     IF v_monto_total > 0 THEN
-        -- Omitimos id_factura porque es IDENTITY y se genera solo
         INSERT INTO Facturacion (fecha, monto, estado_pago, id_empresa)
         VALUES (TO_DATE(p_mes_anio, 'MM/YYYY'), v_monto_total, 'Pendiente', p_id_empresa);
-        
         COMMIT;
+        DBMS_OUTPUT.PUT_LINE('Factura generada exitosamente.');
+    ELSE
+         DBMS_OUTPUT.PUT_LINE('No hay viajes con costos para facturar en este periodo.');
     END IF;
 END sp_generar_factura_empresa;
 /
 
 /* =============================================================================
-   ESCENARIO 2: AsignaciÛn Autom·tica De Viaje
+   SP 2 CORREGIDO: Asignar viaje (con bloqueo de conductor y validaciones)
 ============================================================================= */
 CREATE OR REPLACE PROCEDURE sp_asignar_viaje (
     p_id_solicitud IN NUMBER
 ) IS
     v_id_conductor NUMBER;
     v_id_vehiculo  NUMBER;
+    v_estado_sol NUMBER;
 BEGIN
+    -- [NUEVO] Validar que la solicitud sea apta para asignaci√≥n y exista.
+    SELECT COUNT(*) INTO v_estado_sol FROM Solicitud_Viaje 
+    WHERE id_solicitud = p_id_solicitud AND estado = 'pendiente';
+    
+    IF v_estado_sol = 0 THEN
+         RAISE_APPLICATION_ERROR(-20004, 'La solicitud no existe o no se encuentra en estado pendiente.');
+    END IF;
+
     BEGIN
         SELECT c.id_conductor, v.id_vehiculo
         INTO v_id_conductor, v_id_vehiculo
         FROM Conductor c
         JOIN Vehiculo v ON c.id_conductor = v.id_conductor
-        WHERE c.estado = 'Activo' -- Ajustado al CHECK de Conductor
-          AND ROWNUM = 1;
+        WHERE c.estado = 'Activo' AND ROWNUM = 1;
     EXCEPTION
         WHEN NO_DATA_FOUND THEN
             RAISE_APPLICATION_ERROR(-20001, 'No hay conductores activos/disponibles.');
     END;
 
-    -- Omitimos id_viaje_real porque es IDENTITY. Estado en formato TÌtulo por tu CHECK.
     INSERT INTO Viaje (estado, id_solicitud, id_conductor, id_vehiculo)
     VALUES ('Solicitado', p_id_solicitud, v_id_conductor, v_id_vehiculo);
 
-    -- Actualizamos en min˙scula por el CHECK de Solicitud_Viaje
-    UPDATE Solicitud_Viaje
-    SET estado = 'asignado' 
-    WHERE id_solicitud = p_id_solicitud;
+    UPDATE Solicitud_Viaje SET estado = 'asignado' WHERE id_solicitud = p_id_solicitud;
+    -- [NUEVO] Marcamos al conductor como ocupado para que no le asignen doble simult√°neamente
+    UPDATE Conductor SET estado = 'En viaje' WHERE id_conductor = v_id_conductor;
 
     COMMIT;
+    DBMS_OUTPUT.PUT_LINE('Viaje y conductor asignados correctamente.');
 END sp_asignar_viaje;
 /
 
 /* =============================================================================
-   ESCENARIO 3: C·lculo De Huella De Carbono
+   SP 3 CORREGIDO: Emisiones (Ligera mejora con DBMS_OUTPUT)
 ============================================================================= */
 CREATE OR REPLACE PROCEDURE sp_calcular_emisiones_viaje (
     p_id_viaje IN NUMBER,
@@ -159,71 +176,151 @@ CREATE OR REPLACE PROCEDURE sp_calcular_emisiones_viaje (
     v_tipo      VARCHAR2(50);
     v_factor    NUMBER;
 BEGIN
-    SELECT v.distancia, veh.tipo
-    INTO v_distancia, v_tipo
-    FROM Viaje v
-    JOIN Vehiculo veh ON v.id_vehiculo = veh.id_vehiculo
+    SELECT v.distancia, veh.tipo INTO v_distancia, v_tipo
+    FROM Viaje v JOIN Vehiculo veh ON v.id_vehiculo = veh.id_vehiculo
     WHERE v.id_viaje_real = p_id_viaje;
 
-    -- Contemplamos tildes por si acaso
-    IF UPPER(v_tipo) IN ('ELECTRICO', 'EL…CTRICO') THEN
-        v_factor := 0.0;
-    ELSIF UPPER(v_tipo) IN ('HIBRIDO', 'HÕBRIDO') THEN
-        v_factor := 0.089;
-    ELSE
-        v_factor := 0.200;
+    IF UPPER(v_tipo) IN ('ELECTRICO', 'EL√âCTRICO') THEN v_factor := 0.0;
+    ELSIF UPPER(v_tipo) IN ('HIBRIDO', 'H√çBRIDO') THEN v_factor := 0.089;
+    ELSE v_factor := 0.200;
     END IF;
 
     p_co2 := NVL(v_distancia, 0) * v_factor;
 EXCEPTION
     WHEN NO_DATA_FOUND THEN
         p_co2 := 0;
+        DBMS_OUTPUT.PUT_LINE('ATENCI√ìN: Viaje no encontrado.');
 END sp_calcular_emisiones_viaje;
 /
 
 /* =============================================================================
-   ESCENARIO 4: CancelaciÛn Segura De Solicitud
+   SP 4 CORREGIDO: Cancelaci√≥n (con devoluci√≥n del conductor)
 ============================================================================= */
 CREATE OR REPLACE PROCEDURE sp_cancelar_solicitud (
     p_id_solicitud IN NUMBER
 ) IS
-    v_estado_solicitud VARCHAR2(50);
-    v_estado_viaje     VARCHAR2(50);
+    v_estado_solicitud VARCHAR2(20);
+    v_estado_viaje     VARCHAR2(20);
+    v_id_conductor     NUMBER;
 BEGIN
-    SELECT estado 
-    INTO v_estado_solicitud
-    FROM Solicitud_Viaje
-    WHERE id_solicitud = p_id_solicitud;
+    -- [NUEVO] Encapsulando en bloque propio para evitar crasheo general.
+    BEGIN
+        SELECT estado INTO v_estado_solicitud FROM Solicitud_Viaje WHERE id_solicitud = p_id_solicitud;
+    EXCEPTION
+        WHEN NO_DATA_FOUND THEN
+            RAISE_APPLICATION_ERROR(-20010, 'La solicitud indicada a cancelar no existe.');
+    END;
 
     IF v_estado_solicitud = 'pendiente' THEN
-        UPDATE Solicitud_Viaje
-        SET estado = 'cancelado'
-        WHERE id_solicitud = p_id_solicitud;
+        UPDATE Solicitud_Viaje SET estado = 'cancelado' WHERE id_solicitud = p_id_solicitud;
         COMMIT;
+        DBMS_OUTPUT.PUT_LINE('Solicitud sin conductor ha sido cancelada.');
         
     ELSIF v_estado_solicitud = 'asignado' THEN
         BEGIN
-            SELECT estado 
-            INTO v_estado_viaje
-            FROM Viaje
-            WHERE id_solicitud = p_id_solicitud;
+            SELECT estado, id_conductor INTO v_estado_viaje, v_id_conductor FROM Viaje WHERE id_solicitud = p_id_solicitud;
 
             IF v_estado_viaje = 'En curso' THEN
-                RAISE_APPLICATION_ERROR(-20002, 'El viaje ya est· en curso, no se puede cancelar.');
+                RAISE_APPLICATION_ERROR(-20002, 'El viaje ya est√° en curso, no se puede cancelar.');
             ELSE
                 UPDATE Solicitud_Viaje SET estado = 'cancelado' WHERE id_solicitud = p_id_solicitud;
-                
-                -- ATENCI”N: Como tu tabla 'Viaje' no tiene 'Cancelado' en su CHECK constraint, 
-                -- la mejor pr·ctica para mantener la integridad es eliminar el viaje no iniciado.
+                -- [NUEVO] Liberamos al conductor que qued√≥ atascado para que pueda recibir otro trabajo
+                UPDATE Conductor SET estado = 'Activo' WHERE id_conductor = v_id_conductor; 
                 DELETE FROM Viaje WHERE id_solicitud = p_id_solicitud;
-                
                 COMMIT;
+                DBMS_OUTPUT.PUT_LINE('Viaje cancelado exitosamente y Conductor liberado.');
             END IF;
-        EXCEPTION
-            WHEN NO_DATA_FOUND THEN
-                UPDATE Solicitud_Viaje SET estado = 'cancelado' WHERE id_solicitud = p_id_solicitud;
-                COMMIT;
         END;
     END IF;
 END sp_cancelar_solicitud;
 /
+--------------------------------------------------------------
+---INSERCION DE DATOS DE PRUEBA 
+-- Habilitar los mensajes en pantalla para las validaciones
+SET SERVEROUTPUT ON; 
+
+-- 1. Empresas
+INSERT INTO Empresa (nombre, ruc, direccion, contacto, email, telefono) VALUES ('Tech Corp', '12345678901', 'Av. Central 123', 'Juan Perez', 'contacto@techcorp.com', '555-1234');
+INSERT INTO Empresa (nombre, ruc, direccion, contacto, email, telefono) VALUES ('Innovate LLC', '09876543210', 'Calle False 123', 'Maria Garcia', 'maria@innovate.com', '555-5678');
+
+-- 2. Usuarios
+INSERT INTO Usuario (nombre, email, telefono, contrasena, rol, id_empresa) VALUES ('Ana Lopez', 'ana.lopez@techcorp.com', '555-8881', 'pass123', 'empleado', 1);
+INSERT INTO Usuario (nombre, email, telefono, contrasena, rol, id_empresa) VALUES ('Carlos Ruiz', 'carlos.ruiz@innovate.com', '555-8882', 'pass123', 'administrador', 2);
+
+-- 3. Conductores
+INSERT INTO Conductor (nombre, licencia, telefono, estado, calificacion) VALUES ('Miguel S√°nchez', 'LIC-001', '555-3331', 'Activo', 4.8);
+INSERT INTO Conductor (nombre, licencia, telefono, estado, calificacion) VALUES ('Luisa Fern√°ndez', 'LIC-002', '555-3332', 'Activo', 4.9);
+INSERT INTO Conductor (nombre, licencia, telefono, estado, calificacion) VALUES ('Jos√© Mart√≠nez', 'LIC-003', '555-3333', 'Inactivo', 4.5);
+
+-- 4. Veh√≠culos (Asociados a sus conductores)
+INSERT INTO Vehiculo (marca, modelo, placa, capacidad, tipo, estado, id_conductor) VALUES ('Toyota', 'Prius', 'ABC-123', 4, 'H√≠brido', 'Operativo', 1);
+INSERT INTO Vehiculo (marca, modelo, placa, capacidad, tipo, estado, id_conductor) VALUES ('Tesla', 'Model 3', 'XYZ-987', 4, 'El√©ctrico', 'Operativo', 2);
+
+-- 5. Solicitudes de Viaje (3 Casos de Uso Distintos)
+-- Solicitud #1: Vamos a asignarla y finalizarla artificialmente para tener algo para "Facturar"
+INSERT INTO Solicitud_Viaje (fecha_solicitud, origen, destino, hora_programada, estado, id_usuario) 
+VALUES (TO_DATE('15/02/2026', 'DD/MM/YYYY'), 'Sucursal Sur', 'Oficina Central', SYSDATE, 'completado', 1);
+
+    -- Forzamos la creaci√≥n del viaje concluido correspondiente a la Solicitud #1 (Para probar SP Facturador)
+    INSERT INTO Viaje (fecha_inicio, fecha_fin, distancia, costo, estado, id_solicitud, id_conductor, id_vehiculo)
+    VALUES (SYSDATE-1, SYSDATE, 25.5, 65.50, 'Finalizado', 1, 1, 1);
+
+-- Solicitud #2: La utilizaremos para demostrar la Asignaci√≥n Autom√°tica limpia.
+INSERT INTO Solicitud_Viaje (origen, destino, hora_programada, estado, id_usuario) 
+VALUES ('Oficina Norte', 'Aeropuerto', SYSDATE + 1, 'pendiente', 1);
+
+-- Solicitud #3: La intentaremos cancelar m√°s adelante luego de asignar chofer.
+INSERT INTO Solicitud_Viaje (origen, destino, hora_programada, estado, id_usuario) 
+VALUES ('Terminal Centro', 'Almac√©n', SYSDATE + 5, 'pendiente', 2);
+
+COMMIT;
+------------------------------
+--ejecucion procedimientos almacenados
+---------------------------
+---1.escenario
+BEGIN
+    -- Generar factura para Empresa 1 ('Tech Corp') de la fecha que declaramos artificial ('02/2026')
+    sp_generar_factura_empresa(1, '02/2026');
+END;
+/
+-- Seleccionar para ver la factura generada creada
+SELECT * FROM Facturacion; 
+
+----2.escenario
+BEGIN
+    -- Asignaremos la solicitud #2 (Pendiente de Ana Lopez)
+    sp_asignar_viaje(2);
+END;
+/
+-- Ver√°s que se gener√≥ un insert en Viajes y que Luisa o Miguel pasaron de "Activo" a "En viaje"
+SELECT id_solicitud, estado FROM Solicitud_Viaje WHERE id_solicitud = 2;
+SELECT nombre, estado FROM Conductor;
+SELECT * FROM Viaje WHERE id_solicitud = 2;
+-----3.escenario
+DECLARE
+    v_emision_calculada NUMBER;
+BEGIN
+    -- Calcularemos emisiones del viaje #1 insertado arriba (Cuyo carro 1 es H√≠brido, y manej√≥ 25.5 km). 
+    -- Factor 0.089 * 25.5 = 2.2695
+    sp_calcular_emisiones_viaje(1, v_emision_calculada);
+    DBMS_OUTPUT.PUT_LINE('Emisi√≥n de CO2 Calculada: ' || v_emision_calculada || ' Kgs');
+END;
+/
+
+----4. escenario
+BEGIN
+    -- 1. Primero, asignamos la Solicitud #3 a ver que sucede
+    sp_asignar_viaje(3);
+    
+    -- 2. Oh no, un error del usuario. Vamos a cancelarla.
+    sp_cancelar_solicitud(3);
+END;
+/
+-- Verificar que ya NO existe el registro en la tabla Viaje (Borrado)
+SELECT * FROM Viaje WHERE id_solicitud = 3;
+
+-- Verificar que el estado de la Solicitud ahora es 'Cancelado'
+SELECT estado FROM Solicitud_Viaje WHERE id_solicitud = 3;
+
+-- Y LO M√ÅS IMPORTANTE: El conductor fue devuelto a 'Activo' en el SP y ya no qued√≥ estancado permanentemente!
+SELECT nombre, estado FROM Conductor;
